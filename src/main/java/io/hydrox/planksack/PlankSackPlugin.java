@@ -80,11 +80,13 @@ public class PlankSackPlugin extends Plugin
 	private static final List<String> PLANK_NAMES = Arrays.asList("Plank", "Oak plank", "Teak plank", "Mahogany plank");
 	private static final Set<Integer> MAHOGANY_HOMES_REPAIRS = Sets.newHashSet(
 		39982, 39995, 40011, 40089, 40099, 40158, 40159, 40163, 40168, 40170, 40177, 40295, 40298);
+	private static final Set<Integer> HALLOWED_SEPULCHRE_REPAIRS = Sets.newHashSet(39527, 39528);
 	private static final int CONSTRUCTION_WIDGET_GROUP = 458;
 	private static final int CONSTRUCTION_WIDGET_BUILD_IDX_START = 4;
 	private static final int CONSTRUCTION_SUBWIDGET_MATERIALS = 3;
 	private static final int CONSTRUCTION_SUBWIDGET_CANT_BUILD = 5;
 	private static final int CONSTRUCTION_IMCANDO_MAHOGANY_HOMES = 8912;
+	private static final int CONSTRUCTION_HALLOWED_HAMMER_HALLOWED_SEPULCHRE = 8696;
 	private static final int SCRIPT_CONSTRUCTION_OPTION_CLICKED = 1405;
 	private static final int SCRIPT_CONSTRUCTION_OPTION_KEYBIND = 1632;
 	private static final int SCRIPT_BUILD_CONSTRUCTION_MENU_ENTRY = 1404;
@@ -230,6 +232,11 @@ public class PlankSackPlugin extends Plugin
 			watchForAnimations = MAHOGANY_HOMES_REPAIRS.contains(event.getId());
 			inventorySnapshot = createSnapshot(client.getItemContainer(InventoryID.INVENTORY));
 		}
+		else if (event.getMenuOption().equals("Fix"))
+		{
+			watchForAnimations = HALLOWED_SEPULCHRE_REPAIRS.contains(event.getId());
+			inventorySnapshot = createSnapshot(client.getItemContainer(InventoryID.INVENTORY));
+		}
 	}
 
 	@Subscribe
@@ -346,6 +353,21 @@ public class PlankSackPlugin extends Plugin
 				Multiset<Integer> current = createSnapshot(client.getItemContainer(InventoryID.INVENTORY));
 				Multiset<Integer> delta = Multisets.difference(inventorySnapshot, current);
 				if (delta.size() == 0)
+				{
+					setPlankCount(plankCount - 1);
+				}
+				watchForAnimations = false;
+				lastAnimation = -1;
+			}
+			else if ((lastAnimation == CONSTRUCTION_HALLOWED_HAMMER_HALLOWED_SEPULCHRE || lastAnimation == AnimationID.SMITHING_IMCANDO_HAMMER || lastAnimation == AnimationID.SMITHING_ANVIL) && anim != lastAnimation)
+			{
+				Multiset<Integer> current = createSnapshot(client.getItemContainer(InventoryID.INVENTORY));
+				Multiset<Integer> delta = Multisets.difference(inventorySnapshot, current);
+				if (delta.size() == 0)
+				{
+					setPlankCount(plankCount - 2);
+				}
+				else if (delta.size() == 1)
 				{
 					setPlankCount(plankCount - 1);
 				}
